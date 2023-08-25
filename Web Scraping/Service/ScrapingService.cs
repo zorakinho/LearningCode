@@ -21,8 +21,8 @@ namespace Web_Scraping.Service
     {
         public static async Task RecuperarAtributos
             (
-            string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda", 
-            string atributos = "/html/body/div[1]/div/div[2]/div/div/div[1]/section/div/a", 
+            string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda",
+            string atributos = "/html/body/div[1]/div/div[2]/div/div/div[1]/section/div/a",
             string msg = "elemento pesquisado: "
             )
         {
@@ -62,12 +62,12 @@ namespace Web_Scraping.Service
 
 
 
-            
+
             // Configura o WebDriver do Chrome apontando para o executável do Brave
             var options = new ChromeOptions();
             options.BinaryLocation = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe";
             using var driver = new ChromeDriver(options);
-            
+
 
 
 
@@ -190,7 +190,7 @@ namespace Web_Scraping.Service
             // Mostra a quantidade total de elementos encontrados
             Console.WriteLine($"Total de Elementos Encontrados: {buttons.Count}");
 
-           
+
 
             // Iterar sobre cada botão e acessar o número de telefone
             foreach ((var button, int index) in buttons.Select((button, index) => (button, index)))
@@ -243,7 +243,7 @@ namespace Web_Scraping.Service
 
         public static async Task ScrapingDBSheet(string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda")
         {
-            //link sheet: https://docs.google.com/spreadsheets/d/1hHb4H-ZGDMfCJL_AvWq75Y_D253iuFDaCWjd58NlRj0/edit#gid=0
+            //link sheet: https://docs.google.com/spreadsheets/d/15Dxpm3V61drQ3p2diu6l-6VAY0vPcXB1vLXWLwXwSNc/edit#gid=0
 
 
             // Configura o WebDriver (necessário ter o ChromeDriver instalado e no PATH)
@@ -286,7 +286,7 @@ namespace Web_Scraping.Service
             Console.WriteLine($"Total de Elementos Encontrados: {buttons.Count}");
 
 
-
+            List<Imobiliaria> imobiliarias = new List<Imobiliaria>();
             // Iterar sobre cada botão e acessar o número de telefone
             foreach ((var button, int index) in buttons.Select((button, index) => (button, index)))
             {
@@ -323,9 +323,10 @@ namespace Web_Scraping.Service
                 };
 
                 // Adicionar o objeto Imobiliaria a uma lista (se você desejar)
+                imobiliarias.Add(imobiliaria);
+                Console.WriteLine(imobiliaria.Telefone);
 
-                // Enviar os dados para a planilha (dentro do loop)
-                await SalvarImobiliariaAsync(imobiliaria);
+                
                 // Fecha o modal
                 var closeButton = driver.FindElement(By.CssSelector("span.l-modal__close"));
                 closeButton.Click();
@@ -335,31 +336,33 @@ namespace Web_Scraping.Service
 
 
             }
+            // Enviar os dados para a planilha (dentro do loop)
+            await SalvarImobiliariasAsync(imobiliarias);
 
             // Fechar o WebDriver
             driver.Quit();
         }
 
 
-        static async Task SalvarImobiliariaAsync(Imobiliaria imobiliaria)
+        static async Task SalvarImobiliariasAsync(List<Imobiliaria> imobiliarias)
         {
             using (HttpClient client = new HttpClient())
             {
-                string baseUrl = "https://sheetdb.io/api/v1/quas00khruc2h";
+                string baseUrl = "https://sheetdb.io/api/v1/x1ejl61zv5c8m";
 
-                var dataObject = new
+                var dataObjects = imobiliarias.Select(imobiliaria => new
                 {
                     nome_imob = imobiliaria.NomeImob,
                     telefone = imobiliaria.Telefone,
                     creci = imobiliaria.Creci
-                };
+                }).ToList();
 
-                string jsonPayload = $"{{\"data\": {Newtonsoft.Json.JsonConvert.SerializeObject(dataObject)}}}";
+                string jsonPayload = $"{{\"data\": {Newtonsoft.Json.JsonConvert.SerializeObject(dataObjects)}}}";
 
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                string username = "k527a8qv";
-                string password = "4f1b7gvwyhu90qw27cgj";
+                string username = "xqxhc2sn";
+                string password = "cdtxfvcbc1pbsc7x3qjg";
                 string credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
 
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
@@ -376,7 +379,6 @@ namespace Web_Scraping.Service
                 }
             }
         }
-
 
         public static async Task WaitForPageLoad(IWebDriver driver)
         {
@@ -395,169 +397,5 @@ namespace Web_Scraping.Service
 
 
 
-
-
-        public static async Task RecuperarAtributosComChromeOption(string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda")
-        {
-            // Configurar as opções do ChromeDriver
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--headless"); // Executar em modo headless (sem interface gráfica)
-
-            // Inicializar o ChromeDriver com as opções
-            using (var driver = new ChromeDriver(chromeOptions))
-            {
-                // Navegar para a URL
-                driver.Navigate().GoToUrl(url);
-
-                // Aguardar um pouco para o carregamento da página (você pode ajustar esse valor)
-                await Task.Delay(3000);
-
-                // Aguardar a abertura do modal
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-
-                IWebElement phoneNumberElement = null;
-                try
-                {
-                    phoneNumberElement = wait.Until(driver =>
-                    {
-                        var element = driver.FindElement(By.CssSelector("a.l-link.phone__number"));
-                        return element.Displayed ? element : null;
-                    });
-                }
-                catch (WebDriverTimeoutException)
-                {
-                    Console.WriteLine("O elemento de número de telefone não foi encontrado ou não está visível.");
-                }
-
-                if (phoneNumberElement != null)
-                {
-                    string phoneNumber = phoneNumberElement.Text.Trim();
-                    Console.WriteLine($"Número de Telefone: {phoneNumber}");
-                }
-            }
-        }
-
-        private static string ExtractPhoneNumberFromOnclick(string onclickValue)
-        {
-            // Lógica para extrair o número de telefone do valor do atributo onclick
-            // Nesse exemplo, estou apenas retornando o valor completo do atributo para fins ilustrativos
-            return onclickValue;
-        }
     }
 }
-/*
- public static async Task ScrapingWithGoogleSheets(string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda")
-        {
-            // Configura o WebDriver (necessário ter o ChromeDriver instalado e no PATH)
-            //using var driver = new ChromeDriver();
-
-
-
-
-            // Configura o WebDriver do Chrome apontando para o executável do Brave
-            var options = new ChromeOptions();
-            options.BinaryLocation = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe";
-            using var driver = new ChromeDriver(options);
-
-            // Navega para a URL
-            driver.Navigate().GoToUrl(url);
-
-            // Espera um pouco para carregar os elementos (você pode ajustar esse valor)
-            await Task.Delay(2000);
-
-            // Scroll parcial de tempo em tempo
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            long initialScrollPos = -1;
-            long currentScrollPos = 0;
-
-            do
-            {
-                initialScrollPos = currentScrollPos;
-                js.ExecuteScript("window.scrollTo(0, window.scrollY + 500);");
-                await Task.Delay(300); // Aguarda um tempo entre os scrolls
-                currentScrollPos = Convert.ToInt64(js.ExecuteScript("return window.scrollY;"));
-            } while (currentScrollPos != initialScrollPos);
-
-            // Aguarda até que o scroll alcance o final da página
-            await WaitForPageLoad(driver);
-
-            // Encontra todos os botões para abrir os modais
-            var buttons = driver.FindElements(By.CssSelector("button[data-cy='listing-card-phone-button']"));
-
-            // Mostra a quantidade total de elementos encontrados
-            Console.WriteLine($"Total de Elementos Encontrados: {buttons.Count}");
-
-            // Configurar as credenciais do Google Sheets (substitua pelos seus valores)
-            GoogleCredential credential = GoogleCredential.FromFile("C:\\Users\\robert.alves\\source\\aulas\\AulasEuCodo\\Web Scraping\\credencial.json")
-                .CreateScoped(new[] { SheetsService.Scope.Spreadsheets });
-
-            // Inicializar a API do Google Sheets
-            SheetsService sheetsService = new SheetsService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential
-            });
-
-            // ID da planilha
-            string spreadsheetId = "1hHb4H-ZGDMfCJL_AvWq75Y_D253iuFDaCWjd58NlRj0"; 
-
-            // Iterar sobre cada botão e acessar o número de telefone
-            foreach ((var button, int index) in buttons.Select((button, index) => (button, index)))
-            {
-                // Clica no botão para abrir o modal
-                button.Click();
-
-                // Espera um pouco para que o modal seja aberto (você pode ajustar esse valor)
-                await Task.Delay(50);
-
-                // Obtém o número de telefone do modal
-                var phoneNumberElement = driver.FindElement(By.CssSelector("a.l-link.phone__number"));
-                string phoneNumber = phoneNumberElement.Text.Trim();
-
-                // Obtém o texto do elemento usando XPath
-                var xpathElement = driver.FindElement(By.XPath("//*[@id=\"__next\"]/div/div[2]/div/div/div[1]/section/section[2]/p[1]"));
-                string xpathText = xpathElement.Text.Trim();
-
-                // Divide o texto em nome da corretora e CRECI
-                string nomeCorretora = xpathText;
-                string creci = "";
-
-                int creciIndex = xpathText.IndexOf("- Creci", StringComparison.OrdinalIgnoreCase);
-                if (creciIndex != -1)
-                {
-                    nomeCorretora = xpathText.Substring(0, creciIndex).Trim();
-                    creci = xpathText.Substring(creciIndex + 7).Trim(); // Remove o texto "Creci" e espaços
-                }
-
-                // Fecha o modal
-                var closeButton = driver.FindElement(By.CssSelector("span.l-modal__close"));
-                closeButton.Click();
-
-                // Espera um pouco para que o modal seja fechado (você pode ajustar esse valor)
-                await Task.Delay(100);
-
-                // Criar uma lista de objetos para os dados
-                List<object> rowData = new List<object>
-        {
-            index + 1,
-            phoneNumber,
-            nomeCorretora,
-            creci
-        };
-
-                // Adicionar os dados à planilha
-                ValueRange appendRequest = new ValueRange
-                {
-                    Values = new List<IList<object>> { rowData }
-                };
-
-                SpreadsheetsResource.ValuesResource.AppendRequest request =
-                    sheetsService.Spreadsheets.Values.Append(appendRequest, spreadsheetId, "A1");
-                request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.RAW;
-                var response = request.Execute();
-            }
-
-            // Fechar o WebDriver
-            driver.Quit();
-        }
-
- */
