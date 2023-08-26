@@ -92,7 +92,7 @@ namespace Web_Scraping.Service
             } while (currentScrollPos != initialScrollPos);
 
             // Aguarda até que o scroll alcance o final da página
-            await WaitForPageLoad(driver);
+            await ScrollPageEnd(driver);
 
             // Encontra todos os botões para abrir os modais
             var buttons = driver.FindElements(By.CssSelector("button[data-cy='listing-card-phone-button']"));
@@ -182,7 +182,7 @@ namespace Web_Scraping.Service
             } while (currentScrollPos != initialScrollPos);
 
             // Aguarda até que o scroll alcance o final da página
-            await WaitForPageLoad(driver);
+            await ScrollPageEnd(driver);
 
             // Encontra todos os botões para abrir os modais
             var buttons = driver.FindElements(By.CssSelector("button[data-cy='listing-card-phone-button']"));
@@ -241,7 +241,7 @@ namespace Web_Scraping.Service
 
 
 
-        public static async Task ScrapingDBSheet(string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda")
+        public static async Task ScrapingWebToSheet(string url = "https://www.zapimoveis.com.br/venda/imoveis/sp+sao-paulo+zona-sul+moema/?onde=,S%C3%A3o%20Paulo,S%C3%A3o%20Paulo,Zona%20Sul,Moema,,,neighborhood,BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo%3EZona%20Sul%3EMoema,-23.591783,-46.672733&pagina=1&transacao=venda")
         {
             //link sheet: https://docs.google.com/spreadsheets/d/15Dxpm3V61drQ3p2diu6l-6VAY0vPcXB1vLXWLwXwSNc/edit#gid=0
 
@@ -277,7 +277,7 @@ namespace Web_Scraping.Service
             } while (currentScrollPos != initialScrollPos);
 
             // Aguarda até que o scroll alcance o final da página
-            await WaitForPageLoad(driver);
+            await ScrollPageEnd(driver);
 
             // Encontra todos os botões para abrir os modais
             var buttons = driver.FindElements(By.CssSelector("button[data-cy='listing-card-phone-button']"));
@@ -324,9 +324,9 @@ namespace Web_Scraping.Service
 
                 // Adicionar o objeto Imobiliaria a uma lista (se você desejar)
                 imobiliarias.Add(imobiliaria);
-                Console.WriteLine(imobiliaria.Telefone);
+                Console.WriteLine($"{index+1}º Modal) Dados coletados com sucesso!");
 
-                
+
                 // Fecha o modal
                 var closeButton = driver.FindElement(By.CssSelector("span.l-modal__close"));
                 closeButton.Click();
@@ -337,14 +337,33 @@ namespace Web_Scraping.Service
 
             }
             // Enviar os dados para a planilha (dentro do loop)
-            await SalvarImobiliariasAsync(imobiliarias);
+            await SaveDataSheetAsync(imobiliarias);
 
             // Fechar o WebDriver
             driver.Quit();
         }
 
 
-        static async Task SalvarImobiliariasAsync(List<Imobiliaria> imobiliarias)
+
+        public static async Task ScrollPageEnd(IWebDriver driver)
+        {
+            // Aguarda um tempo inicial
+            await Task.Delay(100);
+
+            while (true)
+            {
+                var isPageLoaded = (bool)((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState === 'complete'");
+                if (isPageLoaded)
+                {
+                    break;
+                }
+                // Aguarda um tempo entre as verificações
+                await Task.Delay(100);
+            }
+        }
+
+
+        static async Task SaveDataSheetAsync(List<Imobiliaria> imobiliarias)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -371,7 +390,7 @@ namespace Web_Scraping.Service
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("Dados salvos com sucesso!");
+                    Console.WriteLine("Lista de objetos enviados com sucesso para a Google Sheet :)");
                 }
                 else
                 {
@@ -379,22 +398,6 @@ namespace Web_Scraping.Service
                 }
             }
         }
-
-        public static async Task WaitForPageLoad(IWebDriver driver)
-        {
-            await Task.Delay(100); // Aguarda um tempo inicial
-
-            while (true)
-            {
-                var isPageLoaded = (bool)((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState === 'complete'");
-                if (isPageLoaded)
-                {
-                    break;
-                }
-                await Task.Delay(100); // Aguarda um tempo entre as verificações
-            }
-        }
-
 
 
     }

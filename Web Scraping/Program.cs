@@ -6,6 +6,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        await ScrapingService.ScrapingDBSheet();
+        await ScrapingService.ScrapingWebToSheet();
     }
 }
