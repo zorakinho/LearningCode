@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "consultandoIp", "consultand
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsultandoCripto", "ConsultandoCripto\ConsultandoCripto.csproj", "{BA9B30AD-E867-4CB8-8502-03D0337B530F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web Scraping", "Web Scraping\Web Scraping.csproj", "{BC0BD345-71DB-4DBC-A0CC-19249AC499A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web Scraping", "Web Scraping\Web Scraping.csproj", "{BC0BD345-71DB-4DBC-A0CC-19249AC499A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mensageria", "Mensageria\Mensageria.csproj", "{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{BC0BD345-71DB-4DBC-A0CC-19249AC499A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC0BD345-71DB-4DBC-A0CC-19249AC499A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC0BD345-71DB-4DBC-A0CC-19249AC499A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
