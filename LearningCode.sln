@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsultandoCripto", "Consul
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web Scraping", "Web Scraping\Web Scraping.csproj", "{BC0BD345-71DB-4DBC-A0CC-19249AC499A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mensageria", "Mensageria\Mensageria.csproj", "{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mensageria", "Mensageria\Mensageria.csproj", "{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadFiles", "ReadFiles\ReadFiles.csproj", "{AB84F468-3BF7-431B-A3DF-6DE8FC701174}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB84F468-3BF7-431B-A3DF-6DE8FC701174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB84F468-3BF7-431B-A3DF-6DE8FC701174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB84F468-3BF7-431B-A3DF-6DE8FC701174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB84F468-3BF7-431B-A3DF-6DE8FC701174}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
