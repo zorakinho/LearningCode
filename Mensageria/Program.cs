@@ -2,6 +2,8 @@
 using System.Net;
 using System.Net.Mail;
 using System.Collections.Generic;
+using System.IO;
+using OfficeOpenXml;
 
 namespace MassEmailSenderExample
 {
@@ -17,45 +19,63 @@ namespace MassEmailSenderExample
             string smtpHost = "smtp.gmail.com";
             int smtpPort = 587;
 
-
-            List<string> recipientEmails = new List<string>
-            {
-                "robert.ads.anjos@gmail.com",
-                "robert_hk_@hotmail.com",
-                // Adicione mais destinatários aqui
-            };
+            string excelFilePath = @"C:\Users\robert.alves\source\aulas\AulasEuCodo\ReadFiles\dadostoemail.xlsx"; // Caminho para o arquivo Excel
 
             try
             {
-                // Configurar o cliente SMTP
-                SmtpClient smtpClient = new SmtpClient(smtpHost, smtpPort);
-                smtpClient.EnableSsl = true;
-                smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
-
-                foreach (string recipientEmail in recipientEmails)
+                using (var package = new ExcelPackage(new FileInfo(excelFilePath)))
                 {
-                    try
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0]; // Assume que a planilha está na primeira guia
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    // Configurar o cliente SMTP
+                    SmtpClient smtpClient = new SmtpClient(smtpHost, smtpPort);
+                    smtpClient.EnableSsl = true;
+                    smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
+
+                    for (int row = 2; row <= rowCount; row++)
                     {
-                        // Criar o objeto de mensagem
-                        MailMessage mail = new MailMessage(senderEmail, recipientEmail);
-                        mail.Subject = "Assunto do email";
-                        mail.Body = "Conteúdo do email";
+                        string bloco = worksheet.Cells[row, 1].Value?.ToString();
+                        string unidade = worksheet.Cells[row, 2].Value?.ToString();
+                        string corretor = worksheet.Cells[row, 3].Value?.ToString();
+                        string cliente = worksheet.Cells[row, 4].Value?.ToString();
+                        string gerente = worksheet.Cells[row, 5].Value?.ToString();
+                        string clienteEmail = worksheet.Cells[row, 6].Value?.ToString();
 
-                        // Incluir opção de cancelamento de inscrição (unsubscribe)
-                        mail.Body += "\n\nClique aqui para cancelar a inscrição: https://seusite.com/unsubscribe";
+                        string emailBody = $"Olá {cliente},\n\nSegue abaixo as informações:\n\n" +
+                            $"Bloco: {bloco}\nUnidade: {unidade}\nCorretor: {corretor}\nGerente: {gerente}";
 
-                        // Enviar o email
-                        smtpClient.Send(mail);
+                        MailMessage mail = new MailMessage(senderEmail, clienteEmail)
+                        {
+                            Subject = "Informações da unidade",
+                            Body = emailBody
+                        };
 
-                        Console.WriteLine($"Email enviado para {recipientEmail}");
+                        // Construir o caminho do arquivo com base no número da unidade
+                        string filePath = $@"C:\Users\robert.alves\source\aulas\AulasEuCodo\ReadFiles\imobfile\{unidade}.pdf"; // Substitua pela extensão e caminho correto
+
+                        if (File.Exists(filePath))
+                        {
+                            mail.Attachments.Add(new Attachment(filePath));
+
+                            try
+                            {
+                                smtpClient.Send(mail);
+                                Console.WriteLine($"Email enviado para {clienteEmail} com arquivo anexado");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Erro ao enviar email para {clienteEmail}: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Arquivo não encontrado para a unidade {unidade}. Email não enviado.");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Erro ao enviar email para {recipientEmail}: {ex.Message}");
-                    }
+
+                    Console.WriteLine("Envio em massa concluído!");
                 }
-
-                Console.WriteLine("Envio em massa concluído!");
             }
             catch (Exception ex)
             {
