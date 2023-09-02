@@ -14,7 +14,7 @@ namespace Mensageria
                 string cliente,
                 string corretor,
                 string gerente,
-                string bloco,
+                string torre,
                 string unidade,
                 string empreendimento,
                 string saudacao
@@ -85,7 +85,7 @@ p {{
       <img src=""https://innovabr.com.br/wp-content/uploads/2021/12/LOGO-PSD-N-Colorido-PARA-FUNDO-BRANCO-1.png"" alt=""innovabr"" class=""logo"">
     </div>
     <div class=""content"">
-      <p>Empreendimento: <b>{empreendimento}</b> -  Torre: <b>{bloco}</b> | Unidade: <b>{unidade}</b></p>
+      <p>Empreendimento: <b>{empreendimento}</b> -  Torre: <b>{torre}</b> | Unidade: <b>{unidade}</b></p>
       <p> {saudacao} <b>{cliente}</b>, conforme alinhado com <b>{corretor}</b>, segue a pasta em <b class=""Gerente"">anexo</b>!</p>
      
     </div>

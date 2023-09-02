@@ -22,9 +22,15 @@ namespace MassEmailSenderExample
 
 
 
-            // Aqui deve ser informado o caminho da planilha excel, que será usada com base dos dados para enviar os emails
-            string excelFilePath = @"C:\Users\robert.alves\source\aulas\AulasEuCodo\ReadFiles\dadostoemail.xlsx";
+            //Caminho da Pasta onde está a planilha e os arquivos: recuando 3 pastas e acessando a pasta betti
 
+            // Obtém o diretório do projeto
+            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti");
+
+
+            // Acessando a planilha excel
+            string excelFilePath = Path.Combine(diretorioDoProjeto, "email.xlsx");
+            Console.WriteLine(excelFilePath);
 
             string saudacao = DateTime.Now.Hour switch
             {
@@ -48,15 +54,15 @@ namespace MassEmailSenderExample
 
                     for (int row = 2; row <= rowCount; row++)
                     {
-                        //abaixo estão as colunas na planilha
-                        string bloco = worksheet.Cells[row, 1].Value?.ToString();
-                        string unidade = worksheet.Cells[row, 2].Value?.ToString();
-                        string corretor = worksheet.Cells[row, 3].Value?.ToString();
-                        string cliente = worksheet.Cells[row, 4].Value?.ToString();
+                        // Abaixo estão as colunas na planilha
+                        string empreendimento = worksheet.Cells[row, 1].Value?.ToString();
+                        string torre = worksheet.Cells[row, 2].Value?.ToString();
+                        string unidade = worksheet.Cells[row, 3].Value?.ToString();
+                        string corretor = worksheet.Cells[row, 4].Value?.ToString();
                         string gerente = worksheet.Cells[row, 5].Value?.ToString();
-                        string clienteEmail = worksheet.Cells[row, 6].Value?.ToString();
-                        string empreendimento = worksheet.Cells[row, 7].Value?.ToString();
-
+                        string cliente = worksheet.Cells[row, 6].Value?.ToString();
+                        string clienteEmail = worksheet.Cells[row, 7].Value?.ToString();
+                        string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
 
 
                         // Supondo que você tenha a classe TemplateEmail e o método GetHtmlTemplate definidos
@@ -71,12 +77,12 @@ namespace MassEmailSenderExample
                         MailMessage mail = new MailMessage(senderEmail, clienteEmail)
                         {
                             Subject = $@"PASTA {empreendimento.ToUpper()} | Corretor: {corretor}",
-                            Body = templateEmail.GetHtmlTemplate(cliente, corretor, gerente, bloco, unidade, empreendimento, saudacao),
+                            Body = templateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao),
                             IsBodyHtml = true
                         };
 
                         // Construir o caminho do arquivo com base no número da unidade
-                        string filePath = $@"C:\Users\robert.alves\source\aulas\AulasEuCodo\ReadFiles\imobfile\{unidade}.pdf"; // Substitua pela extensão e caminho correto
+                        string filePath = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
 
                         if (File.Exists(filePath))
                         {
@@ -84,8 +90,16 @@ namespace MassEmailSenderExample
 
                             try
                             {
+                                string[] enderecosCC = emailsCC.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                                // Adicione cada email em cópia (CC) separadamente
+                                foreach (string endereco in enderecosCC)
+                                {
+                                    mail.CC.Add(endereco.Trim());
+                                }
+
                                 smtpClient.Send(mail);
-                                Console.WriteLine($"Email enviado para {clienteEmail} com arquivo anexado");
+                                Console.WriteLine($"Email com arquivo enviado para {clienteEmail} | Unidade {unidade}");
                             }
                             catch (Exception ex)
                             {
@@ -94,7 +108,7 @@ namespace MassEmailSenderExample
                         }
                         else
                         {
-                            Console.WriteLine($"Arquivo não encontrado para a unidade {unidade}. Email não enviado.");
+                            Console.WriteLine($"Arquivo não encontrado para a unidade {unidade}. Destinatário {clienteEmail} não irá receber e-mail.");
                         }
                     }
 
