@@ -13,6 +13,9 @@ namespace Mensageria.Service
     {
         public static void EmailBot(string senderEmail, string senderPassword) {
 
+            // Licença Excel EPPlus
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
 
             // Configurações do servidor SMTP adequado para envio em massa
             string smtpHost = "smtp.gmail.com";
