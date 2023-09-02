@@ -13,12 +13,13 @@ namespace MassEmailSenderExample
     {
         static void Main(string[] args)
         {
-            EmailService.EmailBot
-                (
-                // Dados do REMETENTE
-                "robert.alves@olxbr.com", //email
-                "ra02xbo0$TRK" //senha 
-                );
+
+            string senderEmail = "robert.alves@olxbr.com"; // Substitua pelo seu e-mail
+            string senderPassword = "ra02xbo0$TRK"; // Substitua pela sua senha
+
+            //EmailService.EnviarEmailsEmParalelo(senderEmail, senderPassword).Wait();
+
+            EmailService.EmailBot(senderEmail, senderPassword);
         }
     }
 }
