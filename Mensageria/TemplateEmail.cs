@@ -9,7 +9,7 @@ namespace Mensageria
     public class TemplateEmail
     {
 
-        public string GetHtmlTemplate
+        public static string GetHtmlTemplate
             (
                 string cliente,
                 string corretor,

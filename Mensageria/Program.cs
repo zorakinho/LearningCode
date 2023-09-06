@@ -16,12 +16,13 @@ namespace MassEmailSenderExample
 
             string senderEmail = "robert.alves@olxbr.com"; // Substitua pelo seu e-mail
             string senderPassword = "ra02xbo0$TRK"; // Substitua pela sua senha
+            string emailDestino = "robert.ads.anjos@gmail.com"; // Email do projeto
 
-            //EmailService.EnviarEmailsEmParalelo(senderEmail, senderPassword).Wait(); 
+            EmailService.EnviarEmailsEmParalelo(senderEmail, senderPassword, emailDestino).Wait(); 
 
             //EmailService.EmailBot(senderEmail, senderPassword);
 
-            EmailService.SendInstantEmailsToRecipients(senderEmail,senderPassword).Wait();
+            //EmailService.SendInstantEmailsToRecipients(senderEmail,senderPassword).Wait();
         }
     }
 }
