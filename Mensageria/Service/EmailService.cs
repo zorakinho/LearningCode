@@ -12,7 +12,7 @@ namespace Mensageria.Service
     public class EmailService
     {
         /*
-        public static void EmailBot(string senderEmail, string senderPassword) {
+        public static void EmailBot(string remetente, string remetentePassword) {
 
             // Licença Excel EPPlus
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -52,7 +52,7 @@ namespace Mensageria.Service
                     // Configurar o cliente SMTP
                     SmtpClient smtpClient = new SmtpClient(smtpHost, smtpPort);
                     smtpClient.EnableSsl = true;
-                    smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
+                    smtpClient.Credentials = new NetworkCredential(remetente, remetentePassword);
 
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -76,7 +76,7 @@ namespace Mensageria.Service
                         // e enviá-lo usando a biblioteca ou método de envio de e-mails de sua escolha
 
 
-                        MailMessage mail = new MailMessage(senderEmail, clienteEmail)
+                        MailMessage mail = new MailMessage(remetente, clienteEmail)
                         {
                             Subject = $@"PASTA {empreendimento.ToUpper()} | Corretor: {corretor}",
                             Body = templateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao),
@@ -130,20 +130,20 @@ namespace Mensageria.Service
 
 
         // ENVIO INSTANTÂNEO 
-        public static async Task EnviarEmailsEmParalelo(string senderEmail, string senderPassword, string emailDestino)
+        public static async Task EnviarEmailsEmParalelo(string remetente, string remetentePassword, string emailDestino)
         {
 
             string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti");
 
 
             // Assunto e corpo do e-mail
-            string assunto = "BOT SENDMAIL -1 VALIDATION";
+            string assunto = @$"BOT SENDMAIL {DateTime.Now}";
             // string corpo = "TESTINHO";
 
             //int[] unidades = { 5, 10, 20, 15, 7, 3, 12, 8, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307 };
-            int[] unidades = { 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307 };
-
-
+            int[] unidades = { 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 01, 307, 101, 307, 101, 307, 101, 307, 101, 307, 307, 101, 307, 101, 307, 101, 307 };
+            int volume = unidades.Length;
+            Console.WriteLine($"enviando {volume}");
 
             // Abaixo estão as colunas na planilha
             string empreendimento = "one";
@@ -173,11 +173,11 @@ namespace Mensageria.Service
                     var smtpClient = new SmtpClient("smtp.gmail.com")
                     {
                         Port = 587,
-                        Credentials = new NetworkCredential(senderEmail, senderPassword),
+                        Credentials = new NetworkCredential(remetente, remetentePassword),
                         EnableSsl = true,
                     };
 
-                    var mensagem = new MailMessage("robert.alves@olxbr.com", "robert.ads.anjos@gmail.com", assunto, "");
+                    var mensagem = new MailMessage(remetente, emailDestino, assunto, "");
 
 
                     // Adicione o template HTML ao corpo do e-mail
@@ -216,7 +216,7 @@ namespace Mensageria.Service
 
 
         /*
-        public static async Task SendInstantEmailsToRecipients(string senderEmail, string senderPassword)
+        public static async Task SendInstantEmailsToRecipients(string remetente, string remetentePassword)
     {
 
             
@@ -236,7 +236,7 @@ namespace Mensageria.Service
             var smtpClient = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,
-                Credentials = new NetworkCredential(senderEmail, senderPassword),
+                Credentials = new NetworkCredential(remetente, remetentePassword),
                 EnableSsl = true,
             };
 

@@ -86,7 +86,7 @@ p {{
     </div>
     <div class=""content"">
       <p>Empreendimento: <b>{empreendimento}</b> -  Torre: <b>{torre}</b> | Unidade: <b>{unidade}</b></p>
-      <p> {saudacao} <b>{cliente}</b>, conforme alinhado com <b>{corretor}</b>, segue a pasta em <b class=""Gerente"">anexo</b>!</p>
+      <p> {saudacao}, Sou o Corretor <b>{corretor}</b>, segue a pasta em <b class=""Gerente"">anexo</b> de nosso cliente <b>{cliente}</b>.</p>
      
     </div>
 

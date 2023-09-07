@@ -14,15 +14,15 @@ namespace MassEmailSenderExample
         static void Main(string[] args)
         {
 
-            string senderEmail = "robert.alves@olxbr.com"; // Substitua pelo seu e-mail
-            string senderPassword = "ra02xbo0$TRK"; // Substitua pela sua senha
-            string emailDestino = "robert.ads.anjos@gmail.com"; // Email do projeto
+            string remetente = "robert.alves@olxbr.com"; // Substitua pelo seu e-mail
+            string remetentePassword = "ra02xbo0$TRK"; // Substitua pela sua senha
+            string emailDestino = "robert.ads.anjos@gmail.com"; // Email do projeto 
 
-            EmailService.EnviarEmailsEmParalelo(senderEmail, senderPassword, emailDestino).Wait(); 
+            EmailService.EnviarEmailsEmParalelo(remetente, remetentePassword, emailDestino).Wait(); // Relacionamento "Um para Um" (1 para 1):
 
-            //EmailService.EmailBot(senderEmail, senderPassword);
+            //EmailService.EmailBot(remetente, remetentePassword); // Relacionamento "Um para Muitos" (1 para N):
 
-            //EmailService.SendInstantEmailsToRecipients(senderEmail,senderPassword).Wait();
+            //EmailService.SendInstantEmailsToRecipients(remetente,remetentePassword).Wait();
         }
     }
 }
