@@ -130,78 +130,91 @@ namespace Mensageria.Service
 
 
         // ENVIO INSTANTÂNEO 
-        public static async Task EnviarEmailsEmParalelo(string remetente, string remetentePassword, string emailDestino)
+        public static async Task EnviarEmailsEmParalelo(string remetente, string remetentePassword, string emailDestino, string smtpHost, int smtpPort)
         {
 
-            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti");
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Licença Excel
+            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti"); // Localizando diretórios com os arquivos
+            string excelFilePath = Path.Combine(diretorioDoProjeto, "email.xlsx"); // Localizando planilha Excel
 
 
+            
+            
             // Assunto e corpo do e-mail
             string assunto = @$"BOT SENDMAIL {DateTime.Now}";
             // string corpo = "TESTINHO";
 
-            //int[] unidades = { 5, 10, 20, 15, 7, 3, 12, 8, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307, 25, 1, 101, 307 };
-            int[] unidades = { 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 101, 307, 01, 307, 101, 307, 101, 307, 101, 307, 101, 307, 307, 101, 307, 101, 307, 101, 307 };
-            int volume = unidades.Length;
-            Console.WriteLine($"enviando {volume}");
 
-            // Abaixo estão as colunas na planilha
-            string empreendimento = "one";
-            string torre = "two";
-            string unidadex = "three";
-            string corretor = "four";
-            string gerente = "five";
-            string cliente = "six";
-            string clienteEmail = "seven";
-            string emailsCC = "eight";
-            string saudacao = "nine";
+            string saudacao = DateTime.Now.Hour switch
+            {
+                int horaAtual when horaAtual > 4 && horaAtual <= 11 => "Bom Dia,",
+                int horaAtual when horaAtual >= 12 && horaAtual <= 18 => "Boa Tarde,",
+                _ => "Boa Noite,"
+            };
 
 
             // Crie uma lista para armazenar tarefas de envio de e-mail
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
 
-            foreach (int unidade in unidades)
+
+            using (var package = new ExcelPackage(new FileInfo(excelFilePath)))
             {
 
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0]; // Assume que a planilha está na primeira guia
+                int rowCount = worksheet.Dimension.Rows;
+                Console.WriteLine($"enviando {rowCount-1}");
 
-                // Construir o caminho do arquivo com base no número da unidade
-                string filePath = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
-
-                if (File.Exists(filePath))
+                for (int row = 2; row <= rowCount; row++)
                 {
 
-                    var smtpClient = new SmtpClient("smtp.gmail.com")
+                    string empreendimento = worksheet.Cells[row, 1].Value?.ToString();
+                    string torre = worksheet.Cells[row, 2].Value?.ToString();
+                    string unidade = worksheet.Cells[row, 3].Value?.ToString();
+                    string corretor = worksheet.Cells[row, 4].Value?.ToString();
+                    string gerente = worksheet.Cells[row, 5].Value?.ToString();
+                    string cliente = worksheet.Cells[row, 6].Value?.ToString();
+                    //string clienteEmail = worksheet.Cells[row, 7].Value?.ToString();
+                    //string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
+
+
+                    // Construir o caminho do arquivo com base no número da unidade
+                    string filePath = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
+
+                    string arquivo = Path.GetFileNameWithoutExtension(filePath);
+
+                    Console.WriteLine($"ARQUIVO: {arquivo}");
+                    if (File.Exists(filePath) && arquivo == unidade)
                     {
-                        Port = 587,
-                        Credentials = new NetworkCredential(remetente, remetentePassword),
-                        EnableSsl = true,
-                    };
 
-                    var mensagem = new MailMessage(remetente, emailDestino, assunto, "");
+                        var smtpClient = new SmtpClient(smtpHost)
+                        {
+                            Port = smtpPort,
+                            Credentials = new NetworkCredential(remetente, remetentePassword),
+                            EnableSsl = true,
+                        };
+
+                        var mensagem = new MailMessage(remetente, emailDestino, assunto, "");
 
 
-                    // Adicione o template HTML ao corpo do e-mail
-                    string templateHtml = TemplateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidadex, empreendimento, saudacao); // Suponha que esta função retorne o HTML do seu template
-                    mensagem.Body = templateHtml;
-                    mensagem.IsBodyHtml = true;
+                        // Adicione o template HTML ao corpo do e-mail
+                        string templateHtml = TemplateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao); // Suponha que esta função retorne o HTML do seu template
+                        mensagem.Body = templateHtml;
+                        mensagem.IsBodyHtml = true;
 
-                    // Adicione a tarefa de envio de e-mail à lista
-                    tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath));
+                        // Adicione a tarefa de envio de e-mail à lista
+                        tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath));
 
-                    await Task.Delay(200);
+                        //await Task.Delay(200);
 
+
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Unidade {unidade} não enviada, está faltando o anexo!");
+                    }
 
                 }
-                else
-                {
-                    Console.WriteLine($"{unidade}) Arquivo não encontrado para a unidade");
-                }
-
-
-
-                
             }
-
             // Aguarde até que todas as tarefas tenham sido concluídas
             await Task.WhenAll(tasks);
 
