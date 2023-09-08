@@ -21,11 +21,19 @@ namespace MassEmailSenderExample
             string smtpHost = "smtp.gmail.com"; // Host
             int smtpPort = 587; // Porta
 
-            EmailService.EnviarEmailsEmParalelo(remetente, remetentePassword, emailDestino, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
+            //EmailService.EnviarEmailsEmParalelo(remetente, remetentePassword, emailDestino, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
 
             //EmailService.EmailBot(remetente, remetentePassword); // Relacionamento "Um para Muitos" (1 para N):
 
-            //EmailService.SendInstantEmailsToRecipients(remetente,remetentePassword).Wait();
+            
+            
+            EmailService.RenomearArquivosParaNumerosSequenciais();
+
+            
+
+
+
+
         }
     }
 }

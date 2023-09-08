@@ -268,5 +268,55 @@ namespace Mensageria.Service
 
 
 
+
+
+
+
+
+        //RENOMEANDO ARQUIVOS
+        public static void RenomearArquivosParaNumerosSequenciais()
+        {
+            string diretorio = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti", "arquivos");
+            try
+            {
+                string[] arquivos = Directory.GetFiles(diretorio, "*.pdf");
+
+                int contador = 1;
+
+                foreach (string arquivo in arquivos)
+                {
+                    string nomeArquivo = Path.GetFileNameWithoutExtension(arquivo);
+                    string extensao = Path.GetExtension(arquivo);
+
+                    string novoNome = $"{contador}{extensao}";
+
+                    string novoCaminho = Path.Combine(diretorio, novoNome);
+
+                    // Verifica se o novo nome já existe, e se existir, adiciona um número ao nome.
+                    while (File.Exists(novoCaminho))
+                    {
+                        contador++;
+                        novoNome = $"{contador}{extensao}";
+                        novoCaminho = Path.Combine(diretorio, novoNome);
+                    }
+
+                    File.Move(arquivo, novoCaminho);
+
+                    Console.WriteLine($"Renomeado: {arquivo} para {novoNome}");
+
+                    contador++;
+                }
+
+                Console.WriteLine("Renomeação concluída.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ocorreu um erro: {ex.Message}");
+            }
+        }
+
+
+
+
     }
 }
