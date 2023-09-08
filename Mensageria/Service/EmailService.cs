@@ -200,9 +200,13 @@ namespace Mensageria.Service
                         string templateHtml = TemplateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao); // Suponha que esta função retorne o HTML do seu template
                         mensagem.Body = templateHtml;
                         mensagem.IsBodyHtml = true;
+                        mensagem.BodyEncoding = Encoding.UTF8;
+                        mensagem.SubjectEncoding = Encoding.UTF8;
+                        mensagem.Headers.Add("Content-Type", "text/html; charset=UTF-8");
+
 
                         // Adicione a tarefa de envio de e-mail à lista
-                        tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath));
+                        tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath,  unidade,  diretorioDoProjeto));
 
                         //await Task.Delay(200);
 
@@ -223,61 +227,31 @@ namespace Mensageria.Service
 
 
 
-
-
-        // ENVIANDO PARA DIVERSOS DISTINATÁRIOS DE MANEIRA INSTANTÂNEA
-
-
-        /*
-        public static async Task SendInstantEmailsToRecipients(string remetente, string remetentePassword)
-    {
-
-            
-                        string[] destinatarios = { "robert.ads.anjos@gmail.com", "bulpert@yahoo.com", "robert_hk_@hotmail.com"};
-            
-
-
-        // Assunto e corpo do e-mail
-        string assunto = "DEV 400 MILISEC ";
-        string corpo = "TESTINHO";
-
-        // Crie uma lista para armazenar tarefas de envio de e-mail
-        List<Task> tasks = new List<Task>();
-
-        for(int i = 0; i < 50; i++) 
+        // RENOMEANDO ARQUIVOS
+        public static async Task RenomearArquivoAsync(string filePath, string novoNome, string diretorioDoProjeto)
         {
-            var smtpClient = new SmtpClient("smtp.gmail.com")
+            try
             {
-                Port = 587,
-                Credentials = new NetworkCredential(remetente, remetentePassword),
-                EnableSsl = true,
-            };
-
-            var mensagem = new MailMessage("robert.alves@olxbr.com", "robert.ads.anjos@gmail.com", assunto, corpo);
-
-            // Adicione a tarefa de envio de e-mail à lista
-            tasks.Add(EnviarEmailAsync(smtpClient, mensagem));
-
-            await Task.Delay(400);
+                string novoCaminhoArquivo = Path.Combine(diretorioDoProjeto, "arquivos", novoNome);
+                File.Move(filePath, novoCaminhoArquivo);
+                Console.WriteLine($"Arquivo renomeado para: {novoNome}");
             }
-
-        // Aguarde até que todas as tarefas tenham sido concluídas
-        await Task.WhenAll(tasks);
-
-        Console.WriteLine("E-mails enviados com sucesso!");
-    }
-*/
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao renomear o arquivo: {ex.Message}");
+            }
+        }
 
 
 
-        static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string filePath)
+
+        static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string filePath, string unidade, string diretorioDoProjeto)
         {
             try
             {
                 mensagem.Attachments.Add(new Attachment(filePath));
                 await smtpClient.SendMailAsync(mensagem);
                 Console.WriteLine($"E-mail enviado para: {mensagem.To[0].Address}");
-                
             }
             catch (Exception ex)
             {
@@ -287,7 +261,11 @@ namespace Mensageria.Service
             {
                 mensagem.Dispose();
             }
+
+            // Aguardar a conclusão do envio de e-mail antes de renomear o arquivo
+            await RenomearArquivoAsync(filePath, $"enviado_{unidade}.pdf", diretorioDoProjeto);
         }
+
 
 
     }
