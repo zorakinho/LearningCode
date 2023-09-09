@@ -11,7 +11,7 @@ namespace Mensageria.Service
 {
     public class EmailService
     {
-        /*
+        
         public static void EmailBot(string remetente, string remetentePassword) {
 
             // Licença Excel EPPlus
@@ -67,19 +67,10 @@ namespace Mensageria.Service
                         string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
 
 
-                        // Supondo que você tenha a classe TemplateEmail e o método GetHtmlTemplate definidos
-
-                        // Instancie a classe TemplateEmail
-                        TemplateEmail templateEmail = new TemplateEmail();
-
-                        // Agora você pode usar a variável emailBody para compor o corpo do seu e-mail
-                        // e enviá-lo usando a biblioteca ou método de envio de e-mails de sua escolha
-
-
                         MailMessage mail = new MailMessage(remetente, clienteEmail)
                         {
                             Subject = $@"PASTA {empreendimento.ToUpper()} | Corretor: {corretor}",
-                            Body = templateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao),
+                            Body = TemplateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao),
                             IsBodyHtml = true
                         };
 
@@ -126,11 +117,11 @@ namespace Mensageria.Service
             }
 
         }
-        */
+        
 
 
-        // ENVIO INSTANTÂNEO 
-        public static async Task EnviarEmailsEmParalelo(string remetente, string remetentePassword, string emailDestino, string smtpHost, int smtpPort)
+        // ENVIO ASSYNC
+        public static async Task EnviarEmailAssync(string remetente, string remetentePassword, string smtpHost, int smtpPort)
         {
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Licença Excel
@@ -162,7 +153,7 @@ namespace Mensageria.Service
 
                 ExcelWorksheet worksheet = package.Workbook.Worksheets[0]; // Assume que a planilha está na primeira guia
                 int rowCount = worksheet.Dimension.Rows;
-                Console.WriteLine($"enviando {rowCount-1}");
+                Console.WriteLine($"FORAM CONTABILIZADAS {rowCount-1} PASTAS PARA O ENVIO:");
 
                 for (int row = 2; row <= rowCount; row++)
                 {
@@ -173,7 +164,7 @@ namespace Mensageria.Service
                     string corretor = worksheet.Cells[row, 4].Value?.ToString();
                     string gerente = worksheet.Cells[row, 5].Value?.ToString();
                     string cliente = worksheet.Cells[row, 6].Value?.ToString();
-                    //string clienteEmail = worksheet.Cells[row, 7].Value?.ToString();
+                    string emailDestino = worksheet.Cells[row, 7].Value?.ToString();
                     //string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
 
 
@@ -182,7 +173,7 @@ namespace Mensageria.Service
 
                     string arquivo = Path.GetFileNameWithoutExtension(filePath);
 
-                    Console.WriteLine($"ARQUIVO: {arquivo}");
+                    //Console.WriteLine($"ARQUIVO: {arquivo}");
                     if (File.Exists(filePath) && arquivo == unidade)
                     {
 
