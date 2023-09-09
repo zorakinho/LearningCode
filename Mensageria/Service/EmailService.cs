@@ -222,7 +222,7 @@ namespace Mensageria.Service
             // Aguarde até que todas as tarefas tenham sido concluídas
             await Task.WhenAll(tasks);
 
-            Console.WriteLine("E-mails enviados com sucesso!");
+            Console.WriteLine("Todos E-mails válidos enviados com sucesso!");
         }
 
 
@@ -244,26 +244,33 @@ namespace Mensageria.Service
 
 
 
-
+        //ENVIANDO E-MAIL ASSINC E RENOMEANDO ARQUIVO ENVIADO
         static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string filePath, string unidade, string diretorioDoProjeto)
         {
+            bool renomear;
             try
             {
                 mensagem.Attachments.Add(new Attachment(filePath));
                 await smtpClient.SendMailAsync(mensagem);
                 Console.WriteLine($"E-mail enviado para: {mensagem.To[0].Address}");
+                renomear = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao enviar e-mail para {mensagem.To[0].Address}: {ex.Message}");
+                renomear = false;
             }
             finally
             {
                 mensagem.Dispose();
             }
+            if (renomear)
+            {
 
             // Aguardar a conclusão do envio de e-mail antes de renomear o arquivo
             await RenomearArquivoAsync(filePath, $"enviado_{unidade}.pdf", diretorioDoProjeto);
+
+            }
         }
 
 
@@ -273,7 +280,7 @@ namespace Mensageria.Service
 
 
 
-        //RENOMEANDO ARQUIVOS
+        //RENOMEANDO ARQUIVOS EM ORDEM NÚMERICA
         public static void RenomearArquivosParaNumerosSequenciais()
         {
             string diretorio = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti", "arquivos");
