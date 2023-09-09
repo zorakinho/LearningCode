@@ -11,7 +11,7 @@ namespace Mensageria.Service
 {
     public class EmailService
     {
-        
+        /*
         public static void EmailBot(string remetente, string remetentePassword) {
 
             // Licença Excel EPPlus
@@ -117,16 +117,20 @@ namespace Mensageria.Service
             }
 
         }
-        
+        */
 
 
         // ENVIO ASSYNC
         public static async Task EnviarEmailAssync(string remetente, string remetentePassword, string smtpHost, int smtpPort)
         {
+            // Licença Excel
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Licença Excel
-            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti"); // Localizando diretórios com os arquivos
-            string excelFilePath = Path.Combine(diretorioDoProjeto, "email.xlsx"); // Localizando planilha Excel
+            // Localizando diretórios com os arquivos
+            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti");
+
+            // Localizando planilha Excel
+            string excelFilePath = Path.Combine(diretorioDoProjeto, "email.xlsx"); 
 
 
             
@@ -155,7 +159,7 @@ namespace Mensageria.Service
                 int rowCount = worksheet.Dimension.Rows;
                 Console.WriteLine($"FORAM CONTABILIZADAS {rowCount-1} PASTAS PARA O ENVIO:");
 
-                for (int row = 2; row <= rowCount; row++)
+                Parallel.For(2, rowCount + 1, row =>
                 {
 
                     string empreendimento = worksheet.Cells[row, 1].Value?.ToString();
@@ -171,36 +175,42 @@ namespace Mensageria.Service
                     // Construir o caminho do arquivo com base no número da unidade
                     string filePath = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
 
-                    string arquivo = Path.GetFileNameWithoutExtension(filePath);
+                   // string arquivo = Path.GetFileNameWithoutExtension(filePath);
 
-                    //Console.WriteLine($"ARQUIVO: {arquivo}");
-                    if (File.Exists(filePath) && arquivo == unidade)
+                    if (File.Exists(filePath) && Path.GetFileNameWithoutExtension(filePath) == unidade)
                     {
+                        try {
 
-                        var smtpClient = new SmtpClient(smtpHost)
+                            var smtpClient = new SmtpClient(smtpHost)
+                            {
+                                Port = smtpPort,
+                                Credentials = new NetworkCredential(remetente, remetentePassword),
+                                EnableSsl = true,
+                            };
+
+                            var mensagem = new MailMessage(remetente, emailDestino, assunto, "");
+
+
+                            // Adicione o template HTML ao corpo do e-mail
+                            string templateHtml = TemplateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao); // Suponha que esta função retorne o HTML do seu template
+                            mensagem.Body = templateHtml;
+                            mensagem.IsBodyHtml = true;
+                            mensagem.BodyEncoding = Encoding.UTF8;
+                            mensagem.SubjectEncoding = Encoding.UTF8;
+                            mensagem.Headers.Add("Content-Type", "text/html; charset=UTF-8");
+
+                            // Adicione os e-mails em cópia (CC) ao e-mail
+                            AdicionarEmailsCC(mensagem, emailsCC);
+                            // Adicione a tarefa de envio de e-mail à lista
+                            tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath, unidade, diretorioDoProjeto, emailsCC));
+
+                            //await Task.Delay(200);
+
+                        }
+                        catch (Exception ex)
                         {
-                            Port = smtpPort,
-                            Credentials = new NetworkCredential(remetente, remetentePassword),
-                            EnableSsl = true,
-                        };
-
-                        var mensagem = new MailMessage(remetente, emailDestino, assunto, "");
-
-
-                        // Adicione o template HTML ao corpo do e-mail
-                        string templateHtml = TemplateEmail.GetHtmlTemplate(cliente, corretor, gerente, torre, unidade, empreendimento, saudacao); // Suponha que esta função retorne o HTML do seu template
-                        mensagem.Body = templateHtml;
-                        mensagem.IsBodyHtml = true;
-                        mensagem.BodyEncoding = Encoding.UTF8;
-                        mensagem.SubjectEncoding = Encoding.UTF8;
-                        mensagem.Headers.Add("Content-Type", "text/html; charset=UTF-8");
-
-
-                        // Adicione a tarefa de envio de e-mail à lista
-                        tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath,  unidade,  diretorioDoProjeto, emailsCC));
-
-                        //await Task.Delay(200);
-
+                            Console.WriteLine($"Erro ao processar a Unidade {unidade}: {ex.Message}");
+                        }
 
                     }
                     else
@@ -208,7 +218,7 @@ namespace Mensageria.Service
                         Console.WriteLine($"Unidade {unidade} não enviada, está faltando o anexo!");
                     }
 
-                }
+                });
             }
             // Aguarde até que todas as tarefas tenham sido concluídas
             await Task.WhenAll(tasks);
@@ -233,6 +243,19 @@ namespace Mensageria.Service
             }
         }
 
+        // Método para adicionar e-mails em cópia (CC) ao e-mail
+        private static void AdicionarEmailsCC(MailMessage mensagem, string emailsCC)
+        {
+            if (!string.IsNullOrWhiteSpace(emailsCC))
+            {
+                string[] copiados = emailsCC.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string copiado in copiados)
+                {
+                    mensagem.CC.Add(copiado.Trim());
+                }
+            }
+        }
+
 
 
         //ENVIANDO E-MAIL ASSINC E RENOMEANDO ARQUIVO ENVIADO
@@ -242,16 +265,6 @@ namespace Mensageria.Service
             try
             {
                 mensagem.Attachments.Add(new Attachment(filePath));
-                string[]? copiados = emailsCC?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (copiados != null && copiados.Length > 0)
-                {
-                    // Adicione cada email em cópia (CC) separadamente
-                    foreach (string copiado in copiados)
-                    {
-                        mensagem.CC.Add(copiado.Trim());
-                    }
-                }
                 await smtpClient.SendMailAsync(mensagem);
                 //Console.WriteLine($"E-mail enviado para: {mensagem.To[0].Address}");
                 renomear = true;
