@@ -21,9 +21,9 @@ namespace MassEmailSenderExample
             string smtpHost = "smtp.gmail.com"; // Host
             int smtpPort = 587; // Porta
 
-          //EmailService.EnviarEmailAssync(remetente, remetentePassword, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
+            EmailService.EnviarEmailAssync(remetente, remetentePassword, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
 
-            EmailService.RenomearArquivosParaNumerosSequenciais();
+            //EmailService.RenomearArquivosParaNumerosSequenciais();
 
             
 

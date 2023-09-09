@@ -165,7 +165,7 @@ namespace Mensageria.Service
                     string gerente = worksheet.Cells[row, 5].Value?.ToString();
                     string cliente = worksheet.Cells[row, 6].Value?.ToString();
                     string emailDestino = worksheet.Cells[row, 7].Value?.ToString();
-                    //string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
+                    string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
 
 
                     // Construir o caminho do arquivo com base no número da unidade
@@ -197,7 +197,7 @@ namespace Mensageria.Service
 
 
                         // Adicione a tarefa de envio de e-mail à lista
-                        tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath,  unidade,  diretorioDoProjeto));
+                        tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath,  unidade,  diretorioDoProjeto, emailsCC));
 
                         //await Task.Delay(200);
 
@@ -219,13 +219,13 @@ namespace Mensageria.Service
 
 
         // RENOMEANDO ARQUIVOS
-        public static async Task RenomearArquivoAsync(string filePath, string novoNome, string diretorioDoProjeto)
+        public static async Task RenomearArquivoAsync(string filePath, string novoNome, string diretorioDoProjeto, string unidade)
         {
             try
             {
                 string novoCaminhoArquivo = Path.Combine(diretorioDoProjeto, "arquivos", novoNome);
                 File.Move(filePath, novoCaminhoArquivo);
-                Console.WriteLine($"Arquivo renomeado para: {novoNome}");
+                Console.WriteLine($"E-mail da Unidade {unidade} enviada com sucesso!");
             }
             catch (Exception ex)
             {
@@ -236,19 +236,29 @@ namespace Mensageria.Service
 
 
         //ENVIANDO E-MAIL ASSINC E RENOMEANDO ARQUIVO ENVIADO
-        static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string filePath, string unidade, string diretorioDoProjeto)
+        static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string filePath, string unidade, string diretorioDoProjeto, string emailsCC)
         {
             bool renomear;
             try
             {
                 mensagem.Attachments.Add(new Attachment(filePath));
+                string[]? copiados = emailsCC?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (copiados != null && copiados.Length > 0)
+                {
+                    // Adicione cada email em cópia (CC) separadamente
+                    foreach (string copiado in copiados)
+                    {
+                        mensagem.CC.Add(copiado.Trim());
+                    }
+                }
                 await smtpClient.SendMailAsync(mensagem);
-                Console.WriteLine($"E-mail enviado para: {mensagem.To[0].Address}");
+                //Console.WriteLine($"E-mail enviado para: {mensagem.To[0].Address}");
                 renomear = true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao enviar e-mail para {mensagem.To[0].Address}: {ex.Message}");
+                Console.WriteLine($"Erro ao enviar e-mail para a Unidade: {unidade} - motivo:{ex.Message}");
                 renomear = false;
             }
             finally
@@ -259,7 +269,7 @@ namespace Mensageria.Service
             {
 
             // Aguardar a conclusão do envio de e-mail antes de renomear o arquivo
-            await RenomearArquivoAsync(filePath, $"enviado_{unidade}.pdf", diretorioDoProjeto);
+            await RenomearArquivoAsync(filePath, $"enviado_{unidade}.pdf", diretorioDoProjeto, unidade);
 
             }
         }
