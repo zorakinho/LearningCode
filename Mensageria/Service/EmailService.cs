@@ -13,23 +13,16 @@ namespace Mensageria.Service
     {
 
         // ENVIO ASSYNC
-        public static async Task EnviarEmailAssync(string remetente, string remetentePassword, string smtpHost, int smtpPort)
+        public static async Task BotEmail(string remetente, string remetentePassword, string smtpHost, int smtpPort)
         {
             // Licença Excel
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             // Localizando diretórios com os arquivos
-            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti");
+            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "bob");
 
             // Localizando planilha Excel
-            string excelFilePath = Path.Combine(diretorioDoProjeto, "email.xlsx"); 
-
-
-            
-            
-            // Assunto e corpo do e-mail
-            string assunto = @$"BOT BOB SENDMAIL - {DateTime.Now}";
-            // string corpo = "TESTINHO";
+            string excelcaminhoDaPasta = Path.Combine(diretorioDoProjeto, "email.xlsx"); 
 
 
             string saudacao = DateTime.Now.Hour switch
@@ -41,37 +34,42 @@ namespace Mensageria.Service
 
 
             // Crie uma lista para armazenar tarefas de envio de e-mail
-            List<Task> tasks = new();
+            List<Task> tarefas = new();
 
 
-            using (var package = new ExcelPackage(new FileInfo(excelFilePath)))
+            using (var package = new ExcelPackage(new FileInfo(excelcaminhoDaPasta)))
             {
+                // Assume que a planilha está na primeira guia
+                ExcelWorksheet planilhaExcel = package.Workbook.Worksheets[0]; 
+                int linhasExistentes = planilhaExcel.Dimension.Rows;
+                Console.WriteLine($"FORAM CONTABILIZADAS {linhasExistentes-1} PASTAS PARA O ENVIO:");
 
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0]; // Assume que a planilha está na primeira guia
-                int rowCount = worksheet.Dimension.Rows;
-                Console.WriteLine($"FORAM CONTABILIZADAS {rowCount-1} PASTAS PARA O ENVIO:");
-
-                Parallel.For(2, rowCount + 1, row =>
+                // Usando o Parallel para realizar uma iteração paralela 
+                Parallel.For(2, linhasExistentes + 1, row =>
                 {
 
-                    string empreendimento = worksheet.Cells[row, 1].Value?.ToString();
-                    string torre = worksheet.Cells[row, 2].Value?.ToString();
-                    string unidade = worksheet.Cells[row, 3].Value?.ToString();
-                    string corretor = worksheet.Cells[row, 4].Value?.ToString();
-                    string gerente = worksheet.Cells[row, 5].Value?.ToString();
-                    string cliente = worksheet.Cells[row, 6].Value?.ToString();
-                    string emailDestino = worksheet.Cells[row, 7].Value?.ToString();
-                    string emailsCC = worksheet.Cells[row, 8].Value?.ToString();
+                    string empreendimento = planilhaExcel.Cells[row, 1].Value?.ToString();
+                    string torre = planilhaExcel.Cells[row, 2].Value?.ToString();
+                    string unidade = planilhaExcel.Cells[row, 3].Value?.ToString();
+                    string corretor = planilhaExcel.Cells[row, 4].Value?.ToString();
+                    string gerente = planilhaExcel.Cells[row, 5].Value?.ToString();
+                    string cliente = planilhaExcel.Cells[row, 6].Value?.ToString();
+                    string emailDestino = planilhaExcel.Cells[row, 7].Value?.ToString();
+                    string emailsCC = planilhaExcel.Cells[row, 8].Value?.ToString();
 
+
+                    
 
                     // Construir o caminho do arquivo com base no número da unidade
-                    string filePath = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
+                    string caminhoDaPasta = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
 
-                   // string arquivo = Path.GetFileNameWithoutExtension(filePath);
 
-                    if (File.Exists(filePath) && Path.GetFileNameWithoutExtension(filePath) == unidade)
+                    if (File.Exists(caminhoDaPasta) && Path.GetFileNameWithoutExtension(caminhoDaPasta) == unidade)
                     {
                         try {
+
+                            // Assunto do email
+                            string assunto = @$"INNOVA BR: PASTA {empreendimento.ToUpper()} | Unidade {unidade}";
 
                             var smtpClient = new SmtpClient(smtpHost)
                             {
@@ -94,9 +92,7 @@ namespace Mensageria.Service
                             // Adicione os e-mails em cópia (CC) ao e-mail
                             AdicionarEmailsCC(mensagem, emailsCC);
                             // Adicione a tarefa de envio de e-mail à lista
-                            tasks.Add(EnviarEmailAsync(smtpClient, mensagem, filePath, unidade, diretorioDoProjeto, emailsCC));
-
-                            //await Task.Delay(200);
+                            tarefas.Add(EnviarEmailAsync(smtpClient, mensagem, caminhoDaPasta, unidade, diretorioDoProjeto, emailsCC));
 
                         }
                         catch (Exception ex)
@@ -113,7 +109,7 @@ namespace Mensageria.Service
                 });
             }
             // Aguarde até que todas as tarefas tenham sido concluídas
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tarefas);
 
             Console.WriteLine("Todos E-mails válidos enviados com sucesso!");
         }
@@ -121,12 +117,12 @@ namespace Mensageria.Service
 
 
         // RENOMEANDO ARQUIVOS
-        public static async Task RenomearArquivoAsync(string filePath, string novoNome, string diretorioDoProjeto, string unidade)
+        public static async Task RenomearArquivoAsync(string caminhoDaPasta, string novoNome, string diretorioDoProjeto, string unidade)
         {
             try
             {
                 string novoCaminhoArquivo = Path.Combine(diretorioDoProjeto, "arquivos", novoNome);
-                File.Move(filePath, novoCaminhoArquivo);
+                File.Move(caminhoDaPasta, novoCaminhoArquivo);
                 Console.WriteLine($"E-mail da Unidade {unidade} enviada com sucesso!");
             }
             catch (Exception ex)
@@ -151,14 +147,13 @@ namespace Mensageria.Service
 
 
         //ENVIANDO E-MAIL ASSINC E RENOMEANDO ARQUIVO ENVIADO
-        static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string filePath, string unidade, string diretorioDoProjeto, string emailsCC)
+        static async Task EnviarEmailAsync(SmtpClient smtpClient, MailMessage mensagem, string caminhoDaPasta, string unidade, string diretorioDoProjeto, string emailsCC)
         {
             bool renomear;
             try
             {
-                mensagem.Attachments.Add(new Attachment(filePath));
+                mensagem.Attachments.Add(new Attachment(caminhoDaPasta));
                 await smtpClient.SendMailAsync(mensagem);
-                //Console.WriteLine($"E-mail enviado para: {mensagem.To[0].Address}");
                 renomear = true;
             }
             catch (Exception ex)
@@ -174,7 +169,7 @@ namespace Mensageria.Service
             {
 
             // Aguardar a conclusão do envio de e-mail antes de renomear o arquivo
-            await RenomearArquivoAsync(filePath, $"enviado_{unidade}.pdf", diretorioDoProjeto, unidade);
+            await RenomearArquivoAsync(caminhoDaPasta, $"enviado_{unidade}.pdf", diretorioDoProjeto, unidade);
 
             }
         }
@@ -184,7 +179,7 @@ namespace Mensageria.Service
         //RENOMEANDO ARQUIVOS EM ORDEM NÚMERICA
         public static void RenomearArquivosParaNumerosSequenciais()
         {
-            string diretorio = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "betti", "arquivos");
+            string diretorio = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "bob", "arquivos");
             try
             {
                 string[] arquivos = Directory.GetFiles(diretorio, "*.pdf");

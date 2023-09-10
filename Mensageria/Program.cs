@@ -18,12 +18,13 @@ namespace MassEmailSenderExample
             string remetentePassword = "ra02xbo0$TRK"; // Substitua pela sua senha
             //string emailDestino = "robert.ads.anjos@gmail.com"; // Email do projeto 
 
-            string smtpHost = "smtp.gmail.com"; // Host
+
+            string smtpHost = "smtp.gmail.com"; //GOOGLE
             int smtpPort = 587; // Porta
 
-            EmailService.EnviarEmailAssync(remetente, remetentePassword, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
+             EmailService.BotEmail(remetente, remetentePassword, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
 
-            //EmailService.RenomearArquivosParaNumerosSequenciais();
+            EmailService.RenomearArquivosParaNumerosSequenciais();
 
             
 

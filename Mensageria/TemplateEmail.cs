@@ -92,7 +92,7 @@ p {{
 
     <div class=""footer"">
       <p class=""Gerente"" >cc: Gerente Imobiliário <b>{gerente}</b></p>
-      <p><b>©InnovaBR. Todos os direitos reservados.</b></p>
+      <p><b>©INNOVA BR. Todos os direitos reservados.</b></p>
     </div>
   </div>
 </body>
