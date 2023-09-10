@@ -45,7 +45,7 @@ namespace Mensageria.Service
                 Console.WriteLine($"FORAM CONTABILIZADAS {linhasExistentes-1} PASTAS PARA O ENVIO:");
 
                 // Usando o Parallel para realizar uma iteração paralela 
-                Parallel.For(2, linhasExistentes + 1, row =>
+                _ = Parallel.For(2, linhasExistentes + 1, row =>
                 {
 
                     string empreendimento = planilhaExcel.Cells[row, 1].Value?.ToString();
@@ -58,7 +58,7 @@ namespace Mensageria.Service
                     string emailsCC = planilhaExcel.Cells[row, 8].Value?.ToString();
 
 
-                    
+
 
                     // Construir o caminho do arquivo com base no número da unidade
                     string caminhoDaPasta = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
@@ -66,7 +66,8 @@ namespace Mensageria.Service
 
                     if (File.Exists(caminhoDaPasta) && Path.GetFileNameWithoutExtension(caminhoDaPasta) == unidade)
                     {
-                        try {
+                        try
+                        {
 
                             // Assunto do email
                             string assunto = @$"INNOVA BR: PASTA {empreendimento.ToUpper()} | Unidade {unidade}";
@@ -117,7 +118,7 @@ namespace Mensageria.Service
 
 
         // RENOMEANDO ARQUIVOS
-        public static async Task RenomearArquivoAsync(string caminhoDaPasta, string novoNome, string diretorioDoProjeto, string unidade)
+        public static void RenomearArquivo(string caminhoDaPasta, string novoNome, string diretorioDoProjeto, string unidade)
         {
             try
             {
@@ -169,7 +170,7 @@ namespace Mensageria.Service
             {
 
             // Aguardar a conclusão do envio de e-mail antes de renomear o arquivo
-            await RenomearArquivoAsync(caminhoDaPasta, $"enviado_{unidade}.pdf", diretorioDoProjeto, unidade);
+            RenomearArquivo(caminhoDaPasta, $"enviado_{unidade}.pdf", diretorioDoProjeto, unidade);
 
             }
         }
