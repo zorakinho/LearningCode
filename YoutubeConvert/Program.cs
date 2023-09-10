@@ -1,14 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using YoutubeExplode;
-using YoutubeExplode.Converter;
 using YoutubeExplode.Videos.Streams;
-using CliWrap;
-using CliWrap.EventStream;
-using CliWrap.Buffered;
-using System.Text;
 
 class Program
 {
@@ -16,57 +10,40 @@ class Program
     {
         var youtube = new YoutubeClient();
 
-        // Get stream manifest
-        var videoUrl = "https://www.youtube.com/watch?v=BF0uf7apZDQ";
+        // Insira o link do vídeo do YouTube que você deseja baixar
+        string videoUrl = "https://www.youtube.com/watch?v=BF0uf7apZDQ";
+
+        // Obtém o manifest das streams
         var streamManifest = await youtube.Videos.Streams.GetManifestAsync(videoUrl);
 
-        // Select best audio stream (highest bitrate)
+        // Seleciona a melhor stream de áudio (a de maior taxa de bits)
         var audioStreamInfo = streamManifest
             .GetAudioStreams()
-            .Where(s => s.Container == Container.Mp4)
+            .Where(s => s.Container == Container.Mp4) // Filtro para streams MP4
             .GetWithHighestBitrate();
 
-        // Select best video stream (1080p60 in this example)
-        var videoStreamInfo = streamManifest
-            .GetVideoStreams()
-            .Where(s => s.Container == Container.Mp4)
-            .OrderByDescending(s => s.VideoQuality).FirstOrDefault();
-
-        // Caminho para o diretório do projeto
-        string diretorioDoProjeto = Directory.GetCurrentDirectory();
-
-        // Caminho completo para o executável ffmpeg
-        string caminhoDoFFmpeg = Path.Combine(diretorioDoProjeto, "ffmpeg.exe");
-
-        // Pasta onde você deseja salvar o arquivo final
-        string pastaDeDestino = diretorioDoProjeto;
-
-        // Nome do arquivo final
-        string nomeDoArquivoFinal = "video.mp4";
-
-        // Caminhos completos para os arquivos de áudio e vídeo baixados
-        string caminhoDoAudio = Path.Combine(pastaDeDestino, $"audio.{audioStreamInfo.Container}");
-        string caminhoDoVideo = Path.Combine(pastaDeDestino, $"video.{videoStreamInfo.Container}");
-
-        // Download dos streams de áudio e vídeo
-        await youtube.Videos.Streams.DownloadAsync(audioStreamInfo, caminhoDoAudio);
-        await youtube.Videos.Streams.DownloadAsync(videoStreamInfo, caminhoDoVideo);
-
-        // Combinar áudio e vídeo usando o ffmpeg
-        var ffmpegProcess = new Command(caminhoDoFFmpeg)
-            .WithArguments($"-i \"{caminhoDoAudio}\" -i \"{caminhoDoVideo}\" -c:v copy -c:a aac -strict experimental \"{nomeDoArquivoFinal}\"")
-            .WithWorkingDirectory(pastaDeDestino);
-
-        var stdErr = new StringBuilder();
-
-        await foreach (var cmdEvent in ffmpegProcess.ListenAsync())
+        if (audioStreamInfo != null)
         {
-            if (cmdEvent is StandardErrorCommandEvent stdErrEvent)
-            {
-                stdErr.Append(stdErrEvent.Text);
-            }
-        }
+            // Caminho para o diretório do projeto
+            string diretorioDoProjeto = Directory.GetCurrentDirectory();
 
-        
+            // Pasta onde você deseja salvar o arquivo final (no caso, o MP3)
+            string pastaDeDestino = diretorioDoProjeto;
+
+            // Nome do arquivo final (MP3)
+            string nomeDoArquivoFinal = "video.mp4";
+
+            // Caminho completo para o arquivo MP3
+            string caminhoDoMp3 = Path.Combine(pastaDeDestino, nomeDoArquivoFinal);
+
+            // Download da stream de áudio (MP4)
+            await youtube.Videos.Streams.DownloadAsync(audioStreamInfo, caminhoDoMp3);
+
+            Console.WriteLine("URL convertida para video");
+        }
+        else
+        {
+            Console.WriteLine("Não foi possível encontrar uma versão de áudio para o vídeo.");
+        }
     }
 }
