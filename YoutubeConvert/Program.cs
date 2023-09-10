@@ -86,9 +86,6 @@ class Program
         return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
     }
 
-    // Função para converter um arquivo MP4 em MP3 usando FFmpeg
-    // Função para converter um arquivo MP4 em MP3 usando FFmpeg
-
 }
 
 
