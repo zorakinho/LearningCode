@@ -17,7 +17,7 @@ class Program
         var youtube = new YoutubeClient();
 
         // Get stream manifest
-        var videoUrl = "https://www.youtube.com/watch?v=HAbTHRxwQh0";
+        var videoUrl = "https://www.youtube.com/watch?v=BF0uf7apZDQ";
         var streamManifest = await youtube.Videos.Streams.GetManifestAsync(videoUrl);
 
         // Select best audio stream (highest bitrate)
