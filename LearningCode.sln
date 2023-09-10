@@ -13,9 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web Scraping", "Web Scrapin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mensageria", "Mensageria\Mensageria.csproj", "{452DF97A-DA41-45B5-8CA9-71D5D93EEDED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadFiles", "ReadFiles\ReadFiles.csproj", "{AB84F468-3BF7-431B-A3DF-6DE8FC701174}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReadFiles", "ReadFiles\ReadFiles.csproj", "{AB84F468-3BF7-431B-A3DF-6DE8FC701174}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendEmail", "SendEmail\SendEmail.csproj", "{0666B488-9C3E-43BC-8F03-DB24A1663B14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SendEmail", "SendEmail\SendEmail.csproj", "{0666B488-9C3E-43BC-8F03-DB24A1663B14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoutubeConvert", "YoutubeConvert\YoutubeConvert.csproj", "{03D2D6D9-0C65-4E9E-8B63-51D7798DD7C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{0666B488-9C3E-43BC-8F03-DB24A1663B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0666B488-9C3E-43BC-8F03-DB24A1663B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0666B488-9C3E-43BC-8F03-DB24A1663B14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03D2D6D9-0C65-4E9E-8B63-51D7798DD7C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03D2D6D9-0C65-4E9E-8B63-51D7798DD7C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03D2D6D9-0C65-4E9E-8B63-51D7798DD7C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03D2D6D9-0C65-4E9E-8B63-51D7798DD7C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
