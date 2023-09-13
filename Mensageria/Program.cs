@@ -20,15 +20,11 @@ namespace MassEmailSenderExample
 
 
             string smtpHost = "smtp.gmail.com"; //GOOGLE
-            int smtpPort = 587; // Porta
+            int smtpPort = 587; // Porta 465 | 25 | 587
 
-            EmailService.BotEmail(remetente, remetentePassword, smtpHost, smtpPort).Wait(); // Relacionamento "Um para Um" (1 para 1):
+           //EmailService.BotEmail(remetente, remetentePassword, smtpHost, smtpPort, 350).Wait(); // Relacionamento "Um para Um" (1 para 1):
 
            //EmailService.RenomearArquivosParaNumerosSequenciais();
-
-            
-
-
 
 
         }

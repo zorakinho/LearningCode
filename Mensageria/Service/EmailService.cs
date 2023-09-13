@@ -13,13 +13,13 @@ namespace Mensageria.Service
     {
 
         // ENVIO ASSYNC
-        public static async Task BotEmail(string remetente, string remetentePassword, string smtpHost, int smtpPort)
+        public static async Task BotEmail(string remetente, string remetentePassword, string smtpHost, int smtpPort, int time = 1000)
         {
             // Licença Excel
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            // Localizando diretórios com os arquivos
-            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "bob");
+            // Localizando diretórios com os enviar
+            string diretorioDoProjeto = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "pastas");
 
             // Localizando planilha Excel
             string excelcaminhoDaPasta = Path.Combine(diretorioDoProjeto, "email.xlsx"); 
@@ -44,6 +44,12 @@ namespace Mensageria.Service
                 int linhasExistentes = planilhaExcel.Dimension.Rows;
                 Console.WriteLine($"FORAM CONTABILIZADAS {linhasExistentes-1} PASTAS PARA O ENVIO:");
 
+                var enviarEmailevent = new AutoResetEvent(false);
+                var timer = new Timer(state =>
+                {
+                    enviarEmailevent.Set();
+                }, null, 0, time); // Dispara o evento a cada segundo
+
                 // Usando o Parallel para realizar uma iteração paralela 
                 _ = Parallel.For(2, linhasExistentes + 1, row =>
                 {
@@ -61,11 +67,12 @@ namespace Mensageria.Service
 
 
                     // Construir o caminho do arquivo com base no número da unidade
-                    string caminhoDaPasta = Path.Combine(diretorioDoProjeto, $@"arquivos\{unidade}.pdf");
+                    string caminhoDaPasta = Path.Combine(diretorioDoProjeto, $@"enviar\{unidade}.pdf");
 
-
+                    
                     if (File.Exists(caminhoDaPasta) && Path.GetFileNameWithoutExtension(caminhoDaPasta) == unidade)
                     {
+                        enviarEmailevent.WaitOne();
                         try
                         {
 
@@ -95,6 +102,7 @@ namespace Mensageria.Service
                             // Adicione a tarefa de envio de e-mail à lista
                             tarefas.Add(EnviarEmailAsync(smtpClient, mensagem, caminhoDaPasta, unidade, diretorioDoProjeto, emailsCC));
 
+                           // await Task.Delay(5000); // milisegundos
                         }
                         catch (Exception ex)
                         {
@@ -108,6 +116,7 @@ namespace Mensageria.Service
                     }
 
                 });
+                timer.Dispose(); // Liberar recursos do temporizador
             }
             // Aguarde até que todas as tarefas tenham sido concluídas
             await Task.WhenAll(tarefas);
@@ -117,12 +126,12 @@ namespace Mensageria.Service
 
 
 
-        // RENOMEANDO ARQUIVOS
+        // RENOMEANDO enviar
         public static void RenomearArquivo(string caminhoDaPasta, string novoNome, string diretorioDoProjeto, string unidade)
         {
             try
             {
-                string novoCaminhoArquivo = Path.Combine(diretorioDoProjeto, "arquivos", novoNome);
+                string novoCaminhoArquivo = Path.Combine(diretorioDoProjeto, "enviar", novoNome);
                 File.Move(caminhoDaPasta, novoCaminhoArquivo);
                 Console.WriteLine($"E-mail da Unidade {unidade} enviada com sucesso!");
             }
@@ -180,7 +189,7 @@ namespace Mensageria.Service
         //RENOMEANDO ARQUIVOS EM ORDEM NÚMERICA
         public static void RenomearArquivosParaNumerosSequenciais()
         {
-            string diretorio = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "bob", "arquivos");
+            string diretorio = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "pastas", "enviar");
             try
             {
                 string[] arquivos = Directory.GetFiles(diretorio, "*.pdf");
